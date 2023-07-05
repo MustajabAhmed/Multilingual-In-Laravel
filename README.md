@@ -1,66 +1,71 @@
-<p align="center"><a href="https://laravel.com" target="_blank"><img src="https://raw.githubusercontent.com/laravel/art/master/logo-lockup/5%20SVG/2%20CMYK/1%20Full%20Color/laravel-logolockup-cmyk-red.svg" width="400" alt="Laravel Logo"></a></p>
+Step 1: Create a new Laravel project
+    composer create-project --prefer-dist laravel/laravel your-project-name
 
-<p align="center">
-<a href="https://github.com/laravel/framework/actions"><img src="https://github.com/laravel/framework/workflows/tests/badge.svg" alt="Build Status"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/dt/laravel/framework" alt="Total Downloads"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/v/laravel/framework" alt="Latest Stable Version"></a>
-<a href="https://packagist.org/packages/laravel/framework"><img src="https://img.shields.io/packagist/l/laravel/framework" alt="License"></a>
-</p>
+Step 2: Install and configure the LaravelLocalization package
+Install the package
+    composer require mcamara/laravel-localization
+Publish the package
+    php artisan vendor:publish --provider="Mcamara\LaravelLocalization\LaravelLocalizationServiceProvider"
 
-## About Laravel
+Step 3: Configure the supported locales
+For example, to enable German ('de') and English ('en'), modify the supportedLocales array as follows:
+    'supportedLocales' => [
+        'de' => ['name' => 'German', 'script' => 'Latn', 'native' => 'Deutsch', 'regional' => 'de_DE'],
+        'en' => ['name' => 'English', 'script' => 'Latn', 'native' => 'English', 'regional' => 'en_GB'],
+    ],
 
-Laravel is a web application framework with expressive, elegant syntax. We believe development must be an enjoyable and creative experience to be truly fulfilling. Laravel takes the pain out of development by easing common tasks used in many web projects, such as:
+Step 4: Set up language files and translations
+Inside each locale directory, create a messages.php file that contains the translation messages for that locale. For example, create resources/lang/de/messages.php for German translations and resources/lang/en/messages.php for English translations.
+for each locale in resources/lang/{locale}/ directory. For instance, you can add "welcome"
+    // resources/lang/de/messages.php
+    return [
+        'welcome' => 'Willkommen',
+        'hello' => 'Hallo',
+    ];
 
-- [Simple, fast routing engine](https://laravel.com/docs/routing).
-- [Powerful dependency injection container](https://laravel.com/docs/container).
-- Multiple back-ends for [session](https://laravel.com/docs/session) and [cache](https://laravel.com/docs/cache) storage.
-- Expressive, intuitive [database ORM](https://laravel.com/docs/eloquent).
-- Database agnostic [schema migrations](https://laravel.com/docs/migrations).
-- [Robust background job processing](https://laravel.com/docs/queues).
-- [Real-time event broadcasting](https://laravel.com/docs/broadcasting).
+    // resources/lang/en/messages.php
+    return [
+        'welcome' => 'Welcome',
+        'hello' => 'Hello',
+    ];
 
-Laravel is accessible, powerful, and provides tools required for large, robust applications.
+Step 5: Define routes with language prefix
+    Route::group(['prefix' => LaravelLocalization::setLocale()], function () {
+        Route::get('/', function () {
+            return view('welcome');
+        });
+    });
 
-## Learning Laravel
+Step 6: Use language switcher in your views
+    <ul class="navbar-nav ml-auto">
+        <li class="nav-item">
+            @if(LaravelLocalization::getCurrentLocale() == 'de')
+                <a class="nav-link nav-link-icon" href="{{ LaravelLocalization::getLocalizedURL('en') }}" data-toggle="tooltip" title="Translate to English">
+                    <img src="{{ asset('argon/img/icons/flags/GB.png') }}" alt="">
+                </a>
+            @else
+                <a class="nav-link nav-link-icon" href="{{ LaravelLocalization::getLocalizedURL('de') }}" data-toggle="tooltip" title="Translate to German">
+                    <img src="{{ asset('argon/img/icons/flags/DE.png') }}" alt="">
+                </a>
+            @endif
+        </li>
+    </ul>
 
-Laravel has the most extensive and thorough [documentation](https://laravel.com/docs) and video tutorial library of all modern web application frameworks, making it a breeze to get started with the framework.
+    or
 
-You may also try the [Laravel Bootcamp](https://bootcamp.laravel.com), where you will be guided through building a modern Laravel application from scratch.
+    <div class="language-switcher">
+    @foreach(LaravelLocalization::getSupportedLocales() as $localeCode => $properties)
+        <a href="{{ LaravelLocalization::getLocalizedURL($localeCode) }}" class="{{ app()->getLocale() === $localeCode ? 'active' : '' }}">
+            {{ $properties['native'] }}
+        </a>
+    @endforeach
+    </div>
 
-If you don't feel like reading, [Laracasts](https://laracasts.com) can help. Laracasts contains over 2000 video tutorials on a range of topics including Laravel, modern PHP, unit testing, and JavaScript. Boost your skills by digging into our comprehensive video library.
+Step: 7
 
-## Laravel Sponsors
+    <h1>{{ __('messages.welcome') }}</h1>
 
-We would like to extend our thanks to the following sponsors for funding Laravel development. If you are interested in becoming a sponsor, please visit the Laravel [Patreon page](https://patreon.com/taylorotwell).
 
-### Premium Partners
+Step: 8
+    Test
 
-- **[Vehikl](https://vehikl.com/)**
-- **[Tighten Co.](https://tighten.co)**
-- **[Kirschbaum Development Group](https://kirschbaumdevelopment.com)**
-- **[64 Robots](https://64robots.com)**
-- **[Cubet Techno Labs](https://cubettech.com)**
-- **[Cyber-Duck](https://cyber-duck.co.uk)**
-- **[Many](https://www.many.co.uk)**
-- **[Webdock, Fast VPS Hosting](https://www.webdock.io/en)**
-- **[DevSquad](https://devsquad.com)**
-- **[Curotec](https://www.curotec.com/services/technologies/laravel/)**
-- **[OP.GG](https://op.gg)**
-- **[WebReinvent](https://webreinvent.com/?utm_source=laravel&utm_medium=github&utm_campaign=patreon-sponsors)**
-- **[Lendio](https://lendio.com)**
-
-## Contributing
-
-Thank you for considering contributing to the Laravel framework! The contribution guide can be found in the [Laravel documentation](https://laravel.com/docs/contributions).
-
-## Code of Conduct
-
-In order to ensure that the Laravel community is welcoming to all, please review and abide by the [Code of Conduct](https://laravel.com/docs/contributions#code-of-conduct).
-
-## Security Vulnerabilities
-
-If you discover a security vulnerability within Laravel, please send an e-mail to Taylor Otwell via [taylor@laravel.com](mailto:taylor@laravel.com). All security vulnerabilities will be promptly addressed.
-
-## License
-
-The Laravel framework is open-sourced software licensed under the [MIT license](https://opensource.org/licenses/MIT).
